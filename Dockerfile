@@ -1,8 +1,10 @@
 FROM openjdk:8-jdk
 ENV JAVA_HOME=/usr/local/openjdk-8
 
+
 # Установка Python и Pip
 RUN apt-get update && apt-get install -y python3 python3-pip
+
 
 # Установка Hadoop
 ENV HADOOP_VERSION 3.2.2
@@ -12,6 +14,7 @@ RUN curl -L https://archive.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION
     tar -xzf hadoop-$HADOOP_VERSION.tar.gz && \
     mv hadoop-$HADOOP_VERSION $HADOOP_HOME && \
     rm hadoop-$HADOOP_VERSION.tar.gz
+
 
 # Установка Spark
 ENV SPARK_VERSION 3.3.4
@@ -26,27 +29,18 @@ RUN curl -L https://dlcdn.apache.org/spark/spark-$SPARK_VERSION/spark-$SPARK_VER
 # Установка PySpark
 RUN pip3 install pyspark==$SPARK_VERSION
 
-# Установка Kafka
-ENV KAFKA_VERSION 3.4.1
-ENV KAFKA_HOME /usr/local/kafka
-RUN curl -L http://apache.mirrors.pair.com/kafka/$KAFKA_VERSION/kafka_2.13-$KAFKA_VERSION.tgz -o kafka_$KAFKA_VERSION.tgz && \
-    tar -xzf kafka_$KAFKA_VERSION.tgz && \
-    mv kafka_2.13-$KAFKA_VERSION $KAFKA_HOME && \
-    rm kafka_$KAFKA_VERSION.tgz
-ENV PATH $PATH:$KAFKA_HOME/bin
 
 # Копирование конфигурационных файлов Hadoop и Spark
 COPY hadoop-config/* $HADOOP_HOME/etc/hadoop/
 COPY spark-config/* $SPARK_HOME/conf/
 
-# Форматирование HDFS и запуск Hadoop
+
+# Запуск Hadoop
 RUN $HADOOP_HOME/bin/hdfs namenode -format
 COPY start-hadoop.sh /usr/local/bin/start-hadoop.sh
 RUN chmod +x /usr/local/bin/start-hadoop.sh
 
 
-
-COPY 1_CollectingData_HDFS.py /usr/local/bin/1_CollectingData_HDFS.py
 COPY data/yelp_academic_dataset_business.json /usr/local/data/yelp/business/yelp_academic_dataset_business.json
 COPY data/yelp_academic_dataset_checkin.json /usr/local/data/yelp/checkin/yelp_academic_dataset_checkin.json
 COPY data/review/* /usr/local/data/yelp/review/
@@ -68,6 +62,3 @@ EXPOSE 8080 9870 9000
 
 # Запуск Hadoop при старте контейнера
 CMD ["/usr/local/bin/start-hadoop.sh"]
-
-# ENTRYPOINT ["bash", "-c"]
-# CMD ["/usr/local/bin/start-hadoop.sh"]
