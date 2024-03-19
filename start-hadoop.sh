@@ -28,13 +28,4 @@ hadoop fs -copyFromLocal /usr/local/data/* /data/
 # Держать контейнер в работающем состояниим
 tail -f /dev/null
 
-pip install hdfs
-pip install tqdm
-
-# docker build -t hadoop_pyspark .
-# docker run -it --name my-hadoop-pyspark hadoop_pyspark
-# docker exec -it 7bd7d6dbf3b9 bash
-
-# hdfs dfs -cat /data/yelp/business/* | head -n 10 | ./mapper.py | sort | ./reducer.py
-# ./run.sh test
 
